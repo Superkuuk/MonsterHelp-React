@@ -1,50 +1,81 @@
-body {
-  font: 14px "Century Gothic", Futura, sans-serif;
-  margin: 20px;
-}
+$red: #802425;
+$borderColor: #ed9a13;
 
-ol, ul {
-  padding-left: 30px;
-}
+.StatBlock {
+  width: 310px;
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 14px;
+  background-color: #fff4d1;
+  padding: 10px;
+  border-top: 5px solid $borderColor;
+  border-bottom: 5px solid $borderColor;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
-.board-row:after {
-  clear: both;
-  content: "";
-  display: table;
-}
+  .triangleContainer {
+      width: 310px;
+      overflow: hidden;
+  }
 
-.status {
-  margin-bottom: 10px;
-}
+  .triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 2.5px 0 2.5px 410px;
+    border-color: transparent transparent transparent $red;
+    margin: 7px 0px;
+  }
 
-.square {
-  background: #fff;
-  border: 1px solid #999;
-  float: left;
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 34px;
-  height: 34px;
-  margin-right: -1px;
-  margin-top: -1px;
-  padding: 0;
-  text-align: center;
-  width: 34px;
-}
+  .name {
+    font: {
+      size: 225%;
+      family: Baskerville, serif;
+      variant: small-caps;
+      weight: 600;
+    }
+    color: $red;
+  }
 
-.square:focus {
-  outline: none;
-}
+  .description {
+      font-style: italic;
+  }
 
-.kbd-navigation .square:focus {
-  background: #ddd;
-}
+  .bold {
+      font-weight: bold;
+  }
 
-.game {
-  display: flex;
-  flex-direction: row;
-}
+  .red {
+      color: $red;
+  }
 
-.game-info {
-  margin-left: 20px;
+  table {
+      width: 100%;
+      border: 0px;
+      border-collapse: collapse;
+      color: $red;
+  }
+
+  th, td {
+      width: 50px;
+      text-align: center;
+  }
+
+  .actions {
+      font-size: 175%;
+      font-variant: small-caps;
+      margin: 17px 0px 0px 0px;
+  }
+
+  .hr {
+      background: $red;
+      height: 2px;
+  }
+
+  .attack {
+      margin: 5px 0px;
+  }
+
+  .attackname {
+      font-weight: bold;
+      font-style: italic;
+  }
 }
