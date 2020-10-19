@@ -6,7 +6,7 @@ import StatBlock from './Statblock.js';
 class Main extends React.Component {
   render() {
     return (
-      <StatBlock />
+      <StatBlock name="Ancient Red Dragon"/>
     );
   }
 }

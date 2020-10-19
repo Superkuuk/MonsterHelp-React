@@ -2,17 +2,28 @@ $red: #802425;
 $borderColor: #ed9a13;
 
 .StatBlock {
-  width: 310px;
-  font-family: Arial,Helvetica,sans-serif;
+  width: 350px;
+  font-family: Helvetica,sans-serif;
   font-size: 14px;
-  background-color: #fff4d1;
   padding: 10px;
-  border-top: 5px solid $borderColor;
-  border-bottom: 5px solid $borderColor;
+
+  border: {
+    top: 5px solid $borderColor; // Fallback
+    bottom: 5px solid $borderColor; // Fallback
+    image: url(https://i.imgur.com/gtHyLi6.png);
+    width: 8px;
+    image-slice: 20;
+  }
+  background: {
+    color: #fff4d1; // Fallback
+    image: url(http://i.imgur.com/BgTMZfn.png);
+    position: center;
+  }
+
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
   .triangleContainer {
-      width: 310px;
+      width: 350px;
       overflow: hidden;
   }
 
@@ -20,7 +31,7 @@ $borderColor: #ed9a13;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 2.5px 0 2.5px 410px;
+    border-width: 2.5px 0 2.5px 450px;
     border-color: transparent transparent transparent $red;
     margin: 7px 0px;
   }
@@ -70,11 +81,11 @@ $borderColor: #ed9a13;
       height: 2px;
   }
 
-  .attack {
+  .action {
       margin: 5px 0px;
   }
 
-  .attackname {
+  .actionname {
       font-weight: bold;
       font-style: italic;
   }
