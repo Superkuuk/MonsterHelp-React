@@ -1,86 +1,59 @@
 import React from 'react';
-import xmlData from './MMBestiary.xml';
 
 class StatBlock extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      monster: {},
-      search: this.props.name,
-      isLoaded: false,
-    };
-  }
-
-  // Read XML data of monsters, search for given monster and update state with found data
-  componentDidMount() {
-    fetch(xmlData)
-    .then(response => response.text())
-    .then(res => structureData(res, this.state.search))
-    .then(data => {
-      this.setState({
-        monster: data,
-        isLoaded: true,
-      })}
-    );
-  }
-
   render() {
-    if (!this.state.isLoaded) {
-      return (<div>Loading...</div>);
-    } else {
-      var {monster} = this.state;
-      var size = "Medium";
-      switch (monster.size) {
-        case "T":
-          size = "Tiny";
-          break;
-        case "S":
-          size = "Small";
-          break;
-        case "M":
-          size = "Medium";
-          break;
-        case "L":
-          size = "Large";
-          break;
-        case "H":
-          size = "Huge";
-          break;
-        case "G":
-          size = "Gargantuan";
-          break;
-        default:
-          size = "UNDEFINED ("+monster.size+")";
-      }
-      return (
-        <div className="StatBlock">
-          <div className="name">{monster.name}</div>
-          <div className="description">{size} {monster.type}, {monster.alignment}</div>
-
-          <TriangleHR />
-
-          <div className="red">
-              <div ><span className="bold">Armor </span><span>{monster.ac}</span></div>
-              <div><span className="bold">Hit Points </span><span>{monster.hp}</span></div>
-              <div><span className="bold">Speed </span><span>{monster.speed}</span></div>
-          </div>
-
-          <TriangleHR />
-
-          <table>
-              <thead><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr></thead>
-              <tbody><tr><td>{AbilityModifier(monster.str)}</td><td>{AbilityModifier(monster.dex)}</td><td>{AbilityModifier(monster.con)}</td><td>{AbilityModifier(monster.int)}</td><td>{AbilityModifier(monster.wis)}</td><td>{AbilityModifier(monster.cha)}</td></tr></tbody>
-          </table>
-
-          <div className="triangleContainer"><div className="triangle"></div></div>
-          <MonsterInfo monster={monster} />
-          <TriangleHR />
-          <Actions action={monster.trait} />
-          <ActionContainer value={monster.action} />
-          <ActionContainer prefix="Legendary" value={monster.legendary} />
-        </div>
-      );
+    var monster = XML2Monster(this.props.monster);
+    var size = "Medium";
+    switch (monster.size) {
+      case "T":
+        size = "Tiny";
+        break;
+      case "S":
+        size = "Small";
+        break;
+      case "M":
+        size = "Medium";
+        break;
+      case "L":
+        size = "Large";
+        break;
+      case "H":
+        size = "Huge";
+        break;
+      case "G":
+        size = "Gargantuan";
+        break;
+      default:
+        size = "UNDEFINED ("+monster.size+")";
     }
+    return (
+      <div className="StatBlock">
+        <div className="name">{monster.name}</div>
+        <div className="description">{size} {monster.type}, {monster.alignment}</div>
+
+        <TriangleHR />
+
+        <div className="red">
+            <div ><span className="bold">Armor </span><span>{monster.ac}</span></div>
+            <div><span className="bold">Hit Points </span><span>{monster.hp}</span></div>
+            <div><span className="bold">Speed </span><span>{monster.speed}</span></div>
+        </div>
+
+        <TriangleHR />
+
+        <table>
+            <thead><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr></thead>
+            <tbody><tr><td>{AbilityModifier(monster.str)}</td><td>{AbilityModifier(monster.dex)}</td><td>{AbilityModifier(monster.con)}</td><td>{AbilityModifier(monster.int)}</td><td>{AbilityModifier(monster.wis)}</td><td>{AbilityModifier(monster.cha)}</td></tr></tbody>
+        </table>
+
+        <div className="triangleContainer"><div className="triangle"></div></div>
+        <MonsterInfo monster={monster} />
+        <TriangleHR />
+        <Actions action={monster.trait} />
+        <ActionContainer value={monster.action} />
+        <ActionContainer prefix="Legendary" value={monster.legendary} />
+      </div>
+    );
   }
 }
 
@@ -129,21 +102,6 @@ function MonsterInfo(props) {
 function MonsterInfoSub(props) {
   if (!props.value) return null;
   return <div><span className="bold">{props.type} </span><span>{props.value}</span></div>;
-}
-
-// Search the given monster m in the xml-data d.
-function structureData(d, m) {
-  d = (new window.DOMParser()).parseFromString(d, "text/xml");
-  d = Array.from(d.getElementsByTagName("monster"));
-  var monsterDOM = [];
-  // Search for given monster
-  for (var i = 0; d.length; i++) {
-    if(d[i].getElementsByTagName("name")[0].childNodes[0].nodeValue === m) {
-      monsterDOM = d[i];
-      break;
-    }
-  }
-  return XML2Monster(monsterDOM);
 }
 
 // convert XML data into JavaScript object of a monster

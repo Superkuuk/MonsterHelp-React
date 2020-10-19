@@ -1,11 +1,31 @@
 $red: #802425;
 $borderColor: #ed9a13;
 
+body {
+  background: {
+    image: url("http://i.imgur.com/QrLSPUv.jpg");
+    size: cover;
+  }
+  font: {
+    family: Helvetica,sans-serif;
+    size: 14px;
+  }
+}
+
+.Search {
+  width: 350px;
+  padding: 10px;
+  margin: 10px;
+  float: left;
+  background-color: #cfe7ce;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
 .StatBlock {
   width: 350px;
-  font-family: Helvetica,sans-serif;
-  font-size: 14px;
   padding: 10px;
+  margin: 10px;
+  float: left;
 
   border: {
     top: 5px solid $borderColor; // Fallback
