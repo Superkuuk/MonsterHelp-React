@@ -107,13 +107,13 @@ function Armor(props) {
       if (item.from) {
         var from = "";
         item.from.forEach(e => {
-          from += bracketText(e) + ", ";
+          from += bracketText(e, "string") + ", ";
         });
         from = from.slice(0, -2);
         ac += " (" + from + ")";
       }
       if (item.condition) {
-        ac += " " + item.condition;
+        ac += " " + bracketText(item.condition, "string");
       }
       ac += ", ";
     } else {
@@ -353,7 +353,7 @@ function MonsterInfoDiv(props){
 }
 
 // Style specified text with brackets
-function bracketText(s) {
+function bracketText(s, t="array") {
   if (typeof s !== 'object') s = [s]; // Make string as array, to make it loopable
   var r = [];
   s.forEach((entry, index) => {
@@ -373,21 +373,23 @@ function bracketText(s) {
             case "dice":
               break;
             case "atk":
-              if (newText === "mw") {
-                newText = <span key={i} className="description">Melee Weapon Attack: </span>;
-              } else if (newText === "mw,rw") {
-                newText = <span key={i} className="description">Melee or Ranged Weapon Attack: </span>;
-              } else if (newText === "rw") {
-                newText = <span key={i} className="description">Ranged Weapon Attack: </span>;
-              } else {
-                newText = <span key={i} className="description red">UNDEFINED Weapon Attack: </span>;
+              if (t === "array") {
+                if (newText === "mw") {
+                  newText = <span key={i} className="description">Melee Weapon Attack: </span>;
+                } else if (newText === "mw,rw") {
+                  newText = <span key={i} className="description">Melee or Ranged Weapon Attack: </span>;
+                } else if (newText === "rw") {
+                  newText = <span key={i} className="description">Ranged Weapon Attack: </span>;
+                } else {
+                  newText = <span key={i} className="description red">UNDEFINED Weapon Attack: </span>;
+                }
               }
               break;
             case "hit":
               newText = "+" + newText;
               break;
             case "h":
-              newText = <span key={i} className="description">Hit: </span>;
+              if (t === "array") newText = <span key={i} className="description">Hit: </span>;
               break;
             case "damage":
               break;
@@ -409,12 +411,19 @@ function bracketText(s) {
         }
       });
       textArray = textArray.filter(obj => obj !== "");
-      r.push(<span key={index} className="actionDescriptionParagraph">{textArray}</span>);
+      if (t === "array") {
+        r.push(<span key={index} className="actionDescriptionParagraph">{textArray}</span>);
+      } else {
+        r.push(textArray)
+      }
     } else {
-      r.push(<span key={index} className="actionDescriptionParagraph">{entry}</span>);
+      if (t === "array") {
+        r.push(<span key={index} className="actionDescriptionParagraph">{entry}</span>);
+      } else {
+        r.push(entry)
+      }
     }
   });
-
   return r;
 }
 
