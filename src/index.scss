@@ -19,6 +19,66 @@ body {
   float: left;
   background-color: #cfe7ce;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .autocomplete {
+    /*the container must be positioned relative:*/
+    position: relative;
+    display: inline-block;
+    width: 250px;
+  }
+
+  input {
+    border: 1px solid transparent;
+    background-color: #f1f1f1;
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  input[type=text] {
+    background-color: #f1f1f1;
+    width: 100%;
+  }
+
+  input[type=submit] {
+    background-color: DodgerBlue;
+    color: #fff;
+  }
+
+  .no-suggestions {
+    color: #999;
+    padding: 0.5rem;
+  }
+
+  .suggestions {
+    border: 1px solid #999;
+    border-top-width: 0;
+    list-style: none;
+    margin-top: 0;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-left: 0;
+    width: 100%;
+    position: absolute;
+    background-color: white;
+  }
+
+  .suggestions li {
+    padding: 0.5rem;
+  }
+
+  .suggestion-active,
+  .suggestions li:hover {
+    background-color: lightgrey;
+    cursor: pointer;
+  }
+
+  .suggestions li:not(:last-of-type) {
+    border-bottom: 1px solid #999;
+  }
 }
 
 .StatBlock {
@@ -64,6 +124,18 @@ body {
       weight: 600;
     }
     color: $red;
+  }
+
+  .actionDescription {
+    .actionDescriptionParagraph:not(:first-child) {
+      display: block;
+      text-indent: 1em;
+    }
+  }
+
+  .monsterInfoDiv {
+    margin-left: 1em;
+    text-indent: -1em;
   }
 
   .description {
