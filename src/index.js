@@ -10,11 +10,13 @@ class Main extends React.Component {
     super(props);
     this.state = {
       data: [],
-      search: "",
       isLoaded: false,
+      StatblockInfo: "all",
+      monsterToShow: {},
     };
 
     updateSearch = updateSearch.bind(this);
+    updateStatblockInfo = updateStatblockInfo.bind(this);
   }
 
   // Read JSON data of monsters from given bestiary
@@ -25,7 +27,6 @@ class Main extends React.Component {
     .then(data => {
       this.setState({
         data: data,
-        search: "",
         isLoaded: true,
       })
     });
@@ -38,11 +39,84 @@ class Main extends React.Component {
     } else {
       return (
         <div>
-          <Search monsterList={createMonsterList(this.state.data)} />
-          <StatBlock monster={getMonsterByName(this.state.data, this.state.search)}/>
+          <Menu data={this.state.data} select={this.state.monsterToShow} />
+          <StatBlock monster={this.state.monsterToShow} info={this.state.StatblockInfo} />
         </div>
       );
     }
+  }
+}
+
+class Menu extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: this.props.data,
+      partyToAdd: "1",
+      party: [],
+      encounters: [],
+    };
+
+    this.handleChangeParty = this.handleChangeParty.bind(this);
+    this.handleSubmitParty = this.handleSubmitParty.bind(this);
+    this.newEncounter = this.newEncounter.bind(this);
+    updateEncounter = updateEncounter.bind(this);
+  }
+
+  handleSubmitParty(event) {
+    //this.state.party.push(parseInt(this.state.partyToAdd));
+    var party = this.state.party;
+    party.push(parseInt(this.state.partyToAdd));
+    this.setState({party: party});
+    event.preventDefault();
+  }
+
+  handleChangeParty(event) {
+    this.setState({partyToAdd: event.target.value});
+  }
+
+  handlePartyMemberClick(i) {
+    var party = this.state.party;
+    party.splice(i, 1);
+    this.setState({party: party});
+  }
+
+  newEncounter(e){
+    var encounters = this.state.encounters;
+    encounters.push({
+      name: "Encounter #" + (encounters.length + 1),
+      monsters: [],
+    });
+    this.setState({encounters: encounters});
+    e.preventDefault();
+  }
+
+  render() {
+    var lvl = [];
+    for (var i = 1; i <= 20; i++) {
+      lvl.push(<option value={i} key={i}>Level {i}</option>);
+    }
+    const party = this.state.party.map((e,i) =>
+      <span key={i} onClick={() => this.handlePartyMemberClick(i)}><i className="material-icons">person</i> lvl {e}</span>
+    );
+
+    return (
+      <div className="Menu">
+        <Search data={this.state.data} />
+        <div className="Party">
+          <form onSubmit={this.handleSubmitParty}>
+            <select onChange={this.handleChangeParty}>{lvl}</select>
+            <input type="submit" value="Add Player" />
+          </form>
+        </div>
+        <div className="PartyMembers">{party}</div>
+        <div className="EncounterOptions">
+          <form onSubmit={this.newEncounter}><input type="submit" value="New Encounter" /></form>
+          <form><input type="submit" value="Generate Encounter" /></form>
+        </div>
+        <EncounterList encounters={this.state.encounters} select={this.props.select} data={this.state.data} party={this.state.party}/>
+      </div>
+    );
   }
 }
 
@@ -51,7 +125,7 @@ class Search extends React.Component {
     super(props);
     this.state = {
       value: '',
-      monsterList: this.props.monsterList,
+      monsterList: createMonsterList(this.props.data),
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -60,11 +134,15 @@ class Search extends React.Component {
 
   handleChange(v) {
     this.setState({value: v});
-    updateSearch(v);
+    if (this.state.monsterList.includes(v)) {
+      updateSearch(getMonsterByName(this.props.data, v));
+    } else {
+      updateSearch(getMonsterByName(this.props.data, ""));
+    }
   }
 
   handleSubmit(event) {
-    // alert('A name was submitted: ' + this.state.value);
+    updateSearch(getMonsterByName(this.props.data, this.state.value));
     event.preventDefault();
   }
 
@@ -75,16 +153,121 @@ class Search extends React.Component {
           <div className="autocomplete">
             <Autocomplete suggestions={this.state.monsterList} placeholder="Monster" onChange={this.handleChange} value={this.state.value} />
           </div>
-          <input type="submit" value="Submit" />
+          <input type="submit" value="Show" />
         </form>
       </div>
     );
   }
 }
 
+class EncounterList extends React.Component {
+  render() {
+    var encounters = this.props.encounters;
+    if (encounters.length === 0) return null;
+    encounters = encounters.map((e,i) =>
+      <div key={i} className="encounterBox">
+        <div className="encounterName"><span>{e.name}</span><Difficulty list={e.monsters} party={this.props.party} /></div>
+        <EncounterMonsterList list={e.monsters} select={this.props.select} data={this.props.data} encounter={i} encounterList={encounters} />
+      </div>
+    );
+    return (
+      <div className="EncounterList">
+        {encounters}
+      </div>
+    );
+  }
+}
+
+class Difficulty extends React.Component {
+  render() {
+    var monsters = this.props.list;
+    var party = this.props.party;
+
+    var monsterXP = 0;
+    monsters.forEach((m, i) => {
+      monsterXP += m.xp;
+    });
+    var multiplierLvl = 0;
+    if (monsters.length === 2) {
+      multiplierLvl = 1;
+    } else if (monsters.length >= 3 && monsters.length <= 6) {
+      multiplierLvl = 2;
+    } else if (monsters.length >= 7 && monsters.length <= 10) {
+      multiplierLvl = 3;
+    } else if (monsters.length >= 11 && monsters.length <= 14) {
+      multiplierLvl = 4;
+    } else if (monsters.length >= 15) {
+      multiplierLvl = 5;
+    }
+    const encounterMultiplier = [1,1.5,2,2.5,3,4,5];
+
+    var partyXP = 0;
+    const partyXPTable = [25, 50, 75, 125, 250, 300, 350, 450, 550, 600, 800, 1000, 1100, 1250, 1400, 1600, 2000, 2100, 2400, 2800];
+    party.forEach((player, i) => {
+      partyXP += partyXPTable[player];
+    });
+    if (party.length < 3) multiplierLvl -= 1;
+    if (party.length > 5) multiplierLvl += 1;
+
+    monsterXP = monsterXP * encounterMultiplier[multiplierLvl];
+
+    var difficulty = "Trivial";
+    if (monsterXP < (partyXP * 2)) difficulty = "Easy";
+    if (monsterXP < (partyXP * 3)) difficulty = "Medium";
+    if (monsterXP < (partyXP * 4)) difficulty = "Hard";
+    if (monsterXP > (partyXP * 4)) difficulty = "Deadly";
+
+    return (
+      <span className={difficulty.toLowerCase()}>{difficulty}</span>
+    );
+  }
+}
+
+class EncounterMonsterList extends React.Component {
+  render() {
+    var addMonsterElem;
+    const list = this.props.list.map((m,i) =>
+      <span key={i} onClick={() => updateSearch(m, "reduced")}>{i+1}. {m.name}</span>
+    );
+
+    if (!(Object.keys(this.props.select).length === 0 && this.props.select.constructor === Object)) {
+      addMonsterElem = <span key={list.length} className="enabled" onClick={() => updateEncounter(this.props.encounter, this.props.select, this.props.encounterList)}>{list.length+1}. Add Monster</span>
+    } else {
+      addMonsterElem = <span key={list.length} className="disabled">{list.length+1}. Add Monster</span>
+    }
+    list.push(addMonsterElem);
+
+    return (
+      <div className="encounterMonsterList">{list}</div>
+    );
+  }
+}
+
+
+// calculate the Xp with the CR
+function calcXP(cr) {
+  const CR2XP = {"0": 10, "1/8": 25, "1/4": 50, "1/2": 100, "1": 200, "2": 450, "3": 700, "4": 1100, "5": 1800, "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900,
+    "11": 7200, "12": 8400, "13": 10000, "14": 11500, "15": 13000, "16": 15000, "17": 18000, "18": 20000, "19": 22000, "20": 25000, "21": 33000, "22": 41000, "23": 50000,
+    "24": 62000, "25": 75000, "26": 90000, "27": 105000, "28": 120000, "29": 135000, "30": 155000
+  };
+  return CR2XP[cr];
+}
+
+// Update encounter e with monster m
+function updateEncounter(e, m, el) {
+  var encounters = el;
+  encounters[e].monsters.push(m);
+  this.setState({encounters});
+}
+
 // Middleman function
-function updateSearch(search) {
-  this.setState({search});
+function updateSearch(m, StatblockInfo="all") {
+  const monsterToShow = m || {};
+  this.setState({monsterToShow, StatblockInfo});
+}
+
+function updateStatblockInfo(StatblockInfo) {
+  this.setState({StatblockInfo});
 }
 
 // Add an index to all monsters
@@ -93,6 +276,7 @@ function addID(d) {
   // Search for given monster
   for (var i = 0; i < d.length; i++) {
     d[i].id = i;
+    d[i].xp = calcXP(d[i].cr);
   }
   console.log(d);
   return d;
@@ -109,16 +293,33 @@ function getMonsterByName(d, m) {
   return monster;
 }
 
-// Given the data and an id, get all data of the monster
-function getMonsterById(d, id) {
-  return d[id];
-}
-
 // Creates an array of the monster names
 function createMonsterList(d) {
   return d.map(m => m.name);
 }
 
+// Roll dice function
+function dice(d) {
+  // d can be "xdy + z", "xdy" or "xdy - z"
+  // => roll x dice of y-sides and add z
+  var o = [];
+  if (d.includes("+")) {
+    o = d.split("+");
+  } else if (d.includes("-")) {
+    o = d.split("-");
+    o[1] = -o[1];
+  } else {
+    o = [d, 0];
+  }
+  o[0] = o[0].split("d");
+  o[0] = o[0].map(e => parseInt(e));
+  o[1] = parseInt(o[1]);
+  var v = o[1];
+  for(var i = 0; i < o[0][0]; i++) {
+    v += Math.floor(Math.random() * (o[0][1]) + 1);
+  }
+  return v;
+}
 
 // ========================================
 

@@ -2,31 +2,48 @@ import React from 'react';
 
 class StatBlock extends React.Component {
   render() {
-    if (this.props.monster) {
+    if (!(Object.keys(this.props.monster).length === 0 && this.props.monster.constructor === Object)) {
       var monster = this.props.monster;
-      return (
-        <div className="StatBlock">
-          <div className="name">{monster.name}</div>
-          <Type monster={monster} />
-        <TriangleHR />
-          <div className="red">
-              <Armor ac={monster.ac} />
-              <Health hp={monster.hp} />
-              <Speed speed={monster.speed} />
+      if (this.props.info === "all") {
+        return (
+          <div className="StatBlock">
+              <div className="name">{monster.name}</div>
+              <Type monster={monster} />
+            <TriangleHR />
+              <div className="red">
+                  <Armor ac={monster.ac} />
+                  <Health hp={monster.hp} />
+                  <Speed speed={monster.speed} />
+              </div>
+            <TriangleHR />
+              <table>
+                  <thead><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr></thead>
+                  <tbody><tr><td>{AbilityModifier(monster.str)}</td><td>{AbilityModifier(monster.dex)}</td><td>{AbilityModifier(monster.con)}</td><td>{AbilityModifier(monster.int)}</td><td>{AbilityModifier(monster.wis)}</td><td>{AbilityModifier(monster.cha)}</td></tr></tbody>
+              </table>
+            <TriangleHR />
+              <MonsterInfo monster={monster} />
+            <TriangleHR />
+              <Traits traits={monster.trait} />
+              <Actions actions={monster.action} />
+              <LegendaryActions actions={monster.legendary} />
           </div>
-        <TriangleHR />
-          <table>
-              <thead><tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr></thead>
-              <tbody><tr><td>{AbilityModifier(monster.str)}</td><td>{AbilityModifier(monster.dex)}</td><td>{AbilityModifier(monster.con)}</td><td>{AbilityModifier(monster.int)}</td><td>{AbilityModifier(monster.wis)}</td><td>{AbilityModifier(monster.cha)}</td></tr></tbody>
-          </table>
-        <TriangleHR />
-          <MonsterInfo monster={monster} />
-        <TriangleHR />
-          <Traits traits={monster.trait} />
-          <Actions actions={monster.action} />
-          <LegendaryActions actions={monster.legendary} />
-        </div>
-      );
+        );
+      } else if (this.props.info === "reduced") {
+        return (
+          <div className="StatBlock">
+              <div className="name">{monster.name}</div>
+              <Type monster={monster} />
+            <TriangleHR />
+              <div className="red">
+                  <Speed speed={monster.speed} />
+              </div>
+            <TriangleHR />
+              <Traits traits={monster.trait} />
+              <Actions actions={monster.action} />
+              <LegendaryActions actions={monster.legendary} />
+          </div>
+        );
+      }
     } else {
       return (
         <div className="StatBlock">
@@ -238,7 +255,7 @@ function MonsterInfo(props) {
       <MonsterInfoCImm type="Condition Immunities" value={props.monster.conditionImmune} />
       <MonsterInfoSenses type="Senses" sense={props.monster.senses} passive={props.monster.passive} />
       <MonsterInfoLan type="Languages" value={props.monster.languages} />
-      <MonsterInfoCR type="Challenge" value={props.monster.cr} />
+      <MonsterInfoCR type="Challenge" cr={props.monster.cr} xp={props.monster.xp} />
     </div>
   );
 }
@@ -344,8 +361,9 @@ function MonsterInfoLan(props) {
   return <MonsterInfoDiv type={props.type} value={v} />;
 }
 function MonsterInfoCR(props) {
-  if (!props.value) return null;
-  return <MonsterInfoDiv type={props.type} value={props.value} />;
+  if (!props.cr) return null;
+  var v = props.cr + " (" + props.xp.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " XP)";
+  return <MonsterInfoDiv type={props.type} value={v} />;
 }
 
 function MonsterInfoDiv(props){
