@@ -91,6 +91,7 @@ function LegendaryActions(props) {
 }
 
 function Health(props) {
+  if (props.hp.calculated) return <div><span className="bold">Hit Points </span><span>{props.hp.calculated}</span></div>;
   return <div><span className="bold">Hit Points </span><span>{props.hp.average} ({props.hp.formula})</span></div>;
 }
 
@@ -375,74 +376,93 @@ function bracketText(s, t="array") {
   if (typeof s !== 'object') s = [s]; // Make string as array, to make it loopable
   var r = [];
   s.forEach((entry, index) => {
-    if (entry.match(/{([^}]+)}/g)) { // Only format if there are brackets
-      var textArray = entry.split(/{([^}]+)}/g);
-      textArray.forEach((item, i) => {
-        if (item[0] === "@") {
-          var type = item.match(/@(\w*)/, '')[1]; // item
-          var newText = item.replace(/@(\w*)(\s*)/g,''); // remove first word after @
-          newText = newText.replace(/\|(\w*)/g,''); // remove first word after |
-          switch (type) {
-            case "item":
-              break;
-            case "dc": //DC
-              newText = "DC " + newText;
-              break;
-            case "dice":
-              break;
-            case "atk":
-              if (t === "array") {
-                if (newText === "mw") {
-                  newText = <span key={i} className="description">Melee Weapon Attack: </span>;
-                } else if (newText === "mw,rw") {
-                  newText = <span key={i} className="description">Melee or Ranged Weapon Attack: </span>;
-                } else if (newText === "rw") {
-                  newText = <span key={i} className="description">Ranged Weapon Attack: </span>;
-                } else {
-                  newText = <span key={i} className="description red">UNDEFINED Weapon Attack: </span>;
-                }
-              }
-              break;
-            case "hit":
-              newText = "+" + newText;
-              break;
-            case "h":
-              if (t === "array") newText = <span key={i} className="description">Hit: </span>;
-              break;
-            case "damage":
-              break;
-            case "creature":
-              break;
-            case "condition":
-              break;
-            case "recharge":
-              if (newText === "") {
-                newText = "(Recharge 6)";
-              } else {
-                newText = "(Recharge " + newText + ")";
-              }
-              break;
-            default:
-
-          }
-          textArray[i] = newText;
+    if (typeof entry === 'object') {
+      // Loop through all subentries of this entry object
+      entry.items.forEach((item, i) => {
+        if (t === "array") {
+          r.push(<span key={index + "_" + i} className="subActionDescriptionParagraph"><span className="bold">{item.name}</span> {alterBracketText(item.entry, t)}</span>);
+        } else {
+          r.push(item.name + ". " + alterBracketText(item.entry, t));
         }
       });
-      textArray = textArray.filter(obj => obj !== "");
-      if (t === "array") {
-        r.push(<span key={index} className="actionDescriptionParagraph">{textArray}</span>);
-      } else {
-        r.push(textArray)
-      }
+
     } else {
       if (t === "array") {
-        r.push(<span key={index} className="actionDescriptionParagraph">{entry}</span>);
+        r.push(<span key={index} className="actionDescriptionParagraph">{alterBracketText(entry, t)}</span>);
       } else {
-        r.push(entry)
+        r.push(alterBracketText(entry, t));
       }
     }
+
   });
   return r;
+}
+
+function alterBracketText(entry, t) {
+  var textArray = entry;
+  if (entry.match(/{([^}]+)}/g)) { // Only format if there are brackets
+    textArray = entry.split(/{([^}]+)}/g);
+    textArray.forEach((item, i) => {
+      if (item[0] === "@") {
+        var type = item.match(/@(\w*)/, '')[1]; // item
+        var newText = item.replace(/@(\w*)(\s*)/g,''); // remove first word after @
+        newText = newText.replace(/\|(\w*)/g,''); // remove first word after |
+        switch (type) {
+          case "item":
+            break;
+          case "dc": //DC
+            newText = "DC " + newText;
+            break;
+          case "dice":
+            break;
+          case "atk":
+            if (t === "array") {
+              if (newText === "mw") {
+                newText = <span key={i} className="description">Melee Weapon Attack: </span>;
+              } else if (newText === "mw,rw") {
+                newText = <span key={i} className="description">Melee or Ranged Weapon Attack: </span>;
+              } else if (newText === "rw") {
+                newText = <span key={i} className="description">Ranged Weapon Attack: </span>;
+              } else if (newText === "ms") {
+                newText = <span key={i} className="description">Melee Spell Attack: </span>;
+              } else if (newText === "rs") {
+                  newText = <span key={i} className="description">Ranged Spell Attack: </span>;
+              } else if (newText === "ms,rs") {
+                newText = <span key={i} className="description">Melee or Ranged Spell Attack: </span>;
+              } else {
+                newText = <span key={i} className="description red">UNDEFINED Attack: </span>;
+              }
+            }
+            break;
+          case "hit":
+            newText = "+" + newText;
+            break;
+          case "h":
+            if (t === "array") newText = <span key={i} className="description">Hit: </span>;
+            break;
+          case "damage":
+            break;
+          case "creature":
+            break;
+          case "condition":
+            break;
+          case "recharge":
+            if (newText === "") {
+              newText = "(Recharge 6)";
+            } else {
+              newText = "(Recharge " + newText + ")";
+            }
+            break;
+          default:
+
+        }
+        textArray[i] = newText;
+      }
+    });
+    textArray = textArray.filter(obj => obj !== "");
+
+  }
+  return textArray;
 }
 
 // Returns the given (signed) modifier for an ability as string (including the original value)

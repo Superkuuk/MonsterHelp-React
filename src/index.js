@@ -3,7 +3,9 @@ import ReactDOM from 'react-dom';
 import './index.scss';
 import StatBlock from './Statblock.js';
 import Autocomplete from "./Autocomplete.js";
+import _ from 'lodash';
 const Bestiary = 'https://raw.githubusercontent.com/TheGiddyLimit/TheGiddyLimit.github.io/master/data/bestiary/bestiary-mm.json';
+
 
 class Main extends React.Component {
   constructor(props) {
@@ -178,6 +180,7 @@ class EncounterList extends React.Component {
   }
 }
 
+
 class Difficulty extends React.Component {
   render() {
     var monsters = this.props.list;
@@ -204,22 +207,23 @@ class Difficulty extends React.Component {
     var partyXP = 0;
     const partyXPTable = [25, 50, 75, 125, 250, 300, 350, 450, 550, 600, 800, 1000, 1100, 1250, 1400, 1600, 2000, 2100, 2400, 2800];
     party.forEach((player, i) => {
-      partyXP += partyXPTable[player];
+      partyXP += partyXPTable[player-1];
     });
-    if (party.length < 3) multiplierLvl -= 1;
+    if (party.length < 3 && multiplierLvl !== 0) multiplierLvl -= 1;
     if (party.length > 5) multiplierLvl += 1;
 
     monsterXP = monsterXP * encounterMultiplier[multiplierLvl];
 
     var difficulty = "Trivial";
-    if (monsterXP < (partyXP * 2)) difficulty = "Easy";
-    if (monsterXP < (partyXP * 3)) difficulty = "Medium";
-    if (monsterXP < (partyXP * 4)) difficulty = "Hard";
-    if (monsterXP > (partyXP * 4)) difficulty = "Deadly";
+    if (monsterXP > partyXP) difficulty = "Easy";
+    if (monsterXP > (partyXP * 2)) difficulty = "Medium";
+    if (monsterXP > (partyXP * 3)) difficulty = "Hard";
+    if (monsterXP >= (partyXP * 4)) difficulty = "Deadly";
 
-    return (
-      <span className={difficulty.toLowerCase()}>{difficulty}</span>
-    );
+    if (partyXP === 0) {
+      return <span className="trivial">-</span>;
+    }
+    return <span className={difficulty.toLowerCase()}>{difficulty}</span>;
   }
 }
 
@@ -227,13 +231,13 @@ class EncounterMonsterList extends React.Component {
   render() {
     var addMonsterElem;
     const list = this.props.list.map((m,i) =>
-      <span key={i} onClick={() => updateSearch(m, "reduced")}>{i+1}. {m.name}</span>
+      <div key={i}><span>{i+1}. {m.name}</span><span className="monsterListOptions"><button>hit</button><button onClick={() => showEncounterMonster(i, this.props.encounter, this.props.encounterList)}>show</button><button onClick={() => updateEncounter(this.props.encounter, i, this.props.encounterList, "remove")}>remove</button></span></div>
     );
 
     if (!(Object.keys(this.props.select).length === 0 && this.props.select.constructor === Object)) {
-      addMonsterElem = <span key={list.length} className="enabled" onClick={() => updateEncounter(this.props.encounter, this.props.select, this.props.encounterList)}>{list.length+1}. Add Monster</span>
+      addMonsterElem = <div key={list.length} className="enabled" onClick={() => updateEncounter(this.props.encounter, createEncounterMonster(this.props.select, this.props.data), this.props.encounterList)}>{list.length+1}. Add Monster</div>
     } else {
-      addMonsterElem = <span key={list.length} className="disabled">{list.length+1}. Add Monster</span>
+      addMonsterElem = <div key={list.length} className="disabled">{list.length+1}. Add Monster</div>
     }
     list.push(addMonsterElem);
 
@@ -243,6 +247,17 @@ class EncounterMonsterList extends React.Component {
   }
 }
 
+function showEncounterMonster (i, encounter, encounterList) {
+  updateSearch(encounterList[encounter].monsters[i], "all");
+}
+
+function createEncounterMonster(m, d) {
+  //console.log(getMonsterByName(d, m.name));
+  var newMonster = _.cloneDeep(m);
+  newMonster.hp.calculated = dice(newMonster.hp.formula);
+  //console.log(m);
+  return newMonster;
+}
 
 // calculate the Xp with the CR
 function calcXP(cr) {
@@ -253,10 +268,14 @@ function calcXP(cr) {
   return CR2XP[cr];
 }
 
-// Update encounter e with monster m
-function updateEncounter(e, m, el) {
+// Update encounter e with monster m, or remove monster with index m from encounter e
+function updateEncounter(e, m, el, type="add") {
   var encounters = el;
-  encounters[e].monsters.push(m);
+  if (type === "add") {
+    encounters[e].monsters.push(m);
+  } else if (type === "remove") {
+    encounters[e].monsters.splice(m, 1);
+  }
   this.setState({encounters});
 }
 

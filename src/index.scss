@@ -51,10 +51,19 @@ body {
     font-size: $fontSize;
   }
 
+  input:focus, select:focus {
+    outline: none;
+  }
+
   input[type=text] {
     background-color: $inputBG;
     width: 100%;
     margin: 0;
+  }
+
+  input[type=text]:focus {
+    border-bottom: 2px solid $DarkVariant;
+    padding-bottom: 8px;
   }
 
   input[type=submit] {
@@ -155,6 +164,7 @@ body {
         linear-gradient(-135deg, transparent 50%, $accentFg 50%),
         linear-gradient(-225deg, transparent 50%, $accentFg 50%),
         linear-gradient($accentFg 42%, $accentBg 42%);
+      cursor: pointer;
     }
 
     select:active {
@@ -179,10 +189,8 @@ body {
       color: white;
       .material-icons {
         font-size: $fontSize;
-        position: relative;
-        top: 1.5px;
+        vertical-align: -2px;
         margin-right: 5px;
-        z-index: 0 !important;
       }
     }
     span:hover {
@@ -217,10 +225,10 @@ body {
         color: green;
       }
       .medium {
-        color: yellow;
+        color: #d1ac17;
       }
       .hard {
-        color: orange;
+        color: #ff7708;
       }
       .deadly {
         color: red;
@@ -228,16 +236,20 @@ body {
     }
     .encounterMonsterList{
       margin: 0;
-      span {
-        display: block;
+      div {
         padding: 2px 10px;
+        margin: 0;
       }
-      span:not(span:last-child):nth-child(odd) {
+      div span:not(.monsterListOptions) {
+        line-height: calc(#{$fontSize} + 14px);
+        vertical-align: middle;
+      }
+      div:not(div:last-child) {
+        display: flex;
+        justify-content: space-between;
+      }
+      div:not(div:last-child):nth-child(odd) {
         background-color: white;
-      }
-      span:not(span:last-child):hover {
-        cursor: pointer;
-        background-color: $BaseColor;
       }
       .enabled {
         background-color: $BaseColor;
@@ -249,7 +261,26 @@ body {
       }
       .disabled {
         background-color: darkgrey;
+        color: grey;
         cursor: default;
+      }
+      .disabled::after {
+        content: " - First find a monster";
+      }
+
+      .monsterListOptions {
+        button {
+          border: 0px solid transparent;
+          background-color: $BaseColor;
+          color: #fff;
+          margin: 0 0 0 2px;
+          cursor: pointer;
+          font-size: $fontSize;
+          padding: 7px;
+        }
+        button:hover {
+          background-color: $DarkVariant;
+        }
       }
     }
   }
@@ -304,6 +335,14 @@ body {
     .actionDescriptionParagraph:not(:first-child) {
       display: block;
       text-indent: 1em;
+    }
+    .subActionDescriptionParagraph {
+      display: block;
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .actionDescriptionParagraph + .subActionDescriptionParagraph {
+      margin-top: 5px;
     }
   }
 
