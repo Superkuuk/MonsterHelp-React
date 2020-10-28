@@ -91,7 +91,7 @@ function LegendaryActions(props) {
 }
 
 function Health(props) {
-  if (props.hp.calculated) return <div><span className="bold">Hit Points </span><span>{props.hp.calculated}</span></div>;
+  if (props.hp.current) return <div><span className="bold">Hit Points </span><span>{props.hp.current} (max: {props.hp.max})</span></div>;
   return <div><span className="bold">Hit Points </span><span>{props.hp.average} ({props.hp.formula})</span></div>;
 }
 
@@ -181,7 +181,6 @@ function Type(props) {
   if (monster.alignment.includes("NX") && monster.alignment.includes("NY")) {
     var all = ["L", "NX", "C", "G", "NY", "E"];
     all = all.filter( ( el ) => !monster.alignment.includes( el ) );
-    console.log(all);
     switch (all[0]) {
       case "G":
         alignment = "any non-good alignment";
@@ -297,16 +296,23 @@ function MonsterInfoRes(props) {
       v += e + ", ";
     }
   });
-  v = v.slice(0, -2) + "; ";
+  if (v.length > 0) v = v.slice(0, -2) + "; ";
   props.value.forEach(e => {
     if (typeof e === 'object') {
-      e.resist.forEach(a => {
-        v += a + ", ";
-      });
-      if (e.note) {
-        v = v.slice(0, -2) + " " + e.note + "; ";
+      if (e.special) {
+        v += e.special + "; ";
       } else {
-        v = v.slice(0, -2) + "; ";
+        if (e.preNote) {
+          v += e.preNote + " ";
+        }
+        e.resist.forEach(a => {
+          v += a + ", ";
+        });
+        if (e.note) {
+          v = v.slice(0, -2) + " " + e.note + "; ";
+        } else {
+          v = v.slice(0, -2) + "; ";
+        }
       }
     }
   });
@@ -390,7 +396,10 @@ function bracketText(s, t="array") {
       if (t === "array") {
         r.push(<span key={index} className="actionDescriptionParagraph">{alterBracketText(entry, t)}</span>);
       } else {
-        r.push(alterBracketText(entry, t));
+        const textArray = alterBracketText(entry, t);
+        var newReturn = "";
+        textArray.forEach((item, i) => newReturn += item);
+        r.push(newReturn);
       }
     }
 
@@ -399,7 +408,7 @@ function bracketText(s, t="array") {
 }
 
 function alterBracketText(entry, t) {
-  var textArray = entry;
+  var textArray = [entry];
   if (entry.match(/{([^}]+)}/g)) { // Only format if there are brackets
     textArray = entry.split(/{([^}]+)}/g);
     textArray.forEach((item, i) => {
@@ -453,6 +462,9 @@ function alterBracketText(entry, t) {
               newText = "(Recharge " + newText + ")";
             }
             break;
+          case "spell":
+            if (t === "array") newText = <span key={i} className="description">newText</span>;
+            break;
           default:
 
         }
@@ -460,7 +472,6 @@ function alterBracketText(entry, t) {
       }
     });
     textArray = textArray.filter(obj => obj !== "");
-
   }
   return textArray;
 }

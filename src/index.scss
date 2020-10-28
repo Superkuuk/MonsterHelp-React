@@ -1,5 +1,11 @@
 $red: #802425;
 $borderColor: #ed9a13;
+$BaseColor: DodgerBlue;
+$DarkVariant: #006fc2;
+$fontSize: 14px;
+$inputBG: #f1f1f1;
+
+
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 body {
@@ -13,13 +19,25 @@ body {
   }
 }
 
+.loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.rootContainer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.menuContainer {
+  display: flex;
+  flex-direction: column;
+}
+
 .Menu {
-
-  $BaseColor: DodgerBlue;
-  $DarkVariant: #006fc2;
-  $fontSize: 14px;
-  $inputBG: #f1f1f1;
-
   width: 350px;
   padding: 10px;
   margin: 10px;
@@ -30,9 +48,10 @@ body {
   display: flex;
   flex-direction: column;
 
-  div {
+  > div, > form {
     margin: 2px 0;
   }
+
 
   * {
     box-sizing: border-box;
@@ -285,6 +304,84 @@ body {
     }
   }
 }
+
+.MonsterMenu {
+  > form {
+    display: flex;
+  }
+  select {
+    flex-grow: 1;
+  }
+
+  .title {
+    font-weight: bold;
+    font-size: 1.1em;
+    text-align: center;
+    margin: 2px 0;
+  }
+
+  .hr {
+    background: $BaseColor;
+    height: 2px;
+    margin-bottom: 10px;
+  }
+
+  button {
+    border: 0px solid transparent;
+    background-color: $BaseColor;
+    color: #fff;
+    margin: 0 0 0 2px;
+    cursor: pointer;
+    font-size: $fontSize;
+    padding: 10px;
+  }
+  button:hover {
+    background-color: $DarkVariant;
+  }
+
+  .Party {
+    input[type="text"] {
+      margin-right: 4px;
+    }
+    fieldset {
+      margin: 0;
+      padding: 0;
+      border: none;
+      display: flex;
+    }
+    fieldset:disabled {
+      opacity: 0.4;
+      input[type="submit"]:hover {
+        background-color: $BaseColor;
+      }
+      select:hover, select:active {
+        background-image: linear-gradient($inputBG, white),
+          linear-gradient(-135deg, transparent 50%, $BaseColor 50%),
+          linear-gradient(-225deg, transparent 50%, $BaseColor 50%),
+          linear-gradient($BaseColor 42%, $DarkVariant 42%);
+        background-color: $inputBG;
+        color: black;
+        border-color: white;
+      }
+      *{
+        cursor: default;
+      }
+    }
+  }
+
+  > span {
+    display: block;
+    font-weight: bold;
+    margin: 2px 0;
+  }
+
+  > span:not(:first-of-type) {
+    margin-top: 10px;
+  }
+
+}
+
+
 
 .StatBlock {
   width: 350px;

@@ -32,15 +32,14 @@ class Main extends React.Component {
         isLoaded: true,
       })
     });
-
   }
 
   render() {
     if (!this.state.isLoaded) {
-      return (<div>Loading...</div>);
+      return (<Loader />);
     } else {
       return (
-        <div>
+        <div className="rootContainer">
           <Menu data={this.state.data} select={this.state.monsterToShow} />
           <StatBlock monster={this.state.monsterToShow} info={this.state.StatblockInfo} />
         </div>
@@ -57,12 +56,14 @@ class Menu extends React.Component {
       partyToAdd: "1",
       party: [],
       encounters: [],
+      selectedMonster: {},
     };
 
     this.handleChangeParty = this.handleChangeParty.bind(this);
     this.handleSubmitParty = this.handleSubmitParty.bind(this);
     this.newEncounter = this.newEncounter.bind(this);
     updateEncounter = updateEncounter.bind(this);
+    showMonster = showMonster.bind(this);
   }
 
   handleSubmitParty(event) {
@@ -101,24 +102,168 @@ class Menu extends React.Component {
     const party = this.state.party.map((e,i) =>
       <span key={i} onClick={() => this.handlePartyMemberClick(i)}><i className="material-icons">person</i> lvl {e}</span>
     );
-
     return (
-      <div className="Menu">
-        <Search data={this.state.data} />
-        <div className="Party">
-          <form onSubmit={this.handleSubmitParty}>
-            <select onChange={this.handleChangeParty}>{lvl}</select>
-            <input type="submit" value="Add Player" />
-          </form>
+      <div className="menuContainer">
+        <div className="Menu">
+          <Search data={this.state.data} />
+          <div className="Party">
+            <form onSubmit={this.handleSubmitParty}>
+              <select onChange={this.handleChangeParty}>{lvl}</select>
+              <input type="submit" value="Add Player" />
+            </form>
+          </div>
+          <div className="PartyMembers">{party}</div>
+          <div className="EncounterOptions">
+            <form onSubmit={this.newEncounter}><input type="submit" value="New Encounter" /></form>
+            <form><input type="submit" value="Generate Encounter" /></form>
+          </div>
+          <EncounterList encounters={this.state.encounters} select={this.props.select} data={this.state.data} party={this.state.party}/>
         </div>
-        <div className="PartyMembers">{party}</div>
-        <div className="EncounterOptions">
-          <form onSubmit={this.newEncounter}><input type="submit" value="New Encounter" /></form>
-          <form><input type="submit" value="Generate Encounter" /></form>
-        </div>
-        <EncounterList encounters={this.state.encounters} select={this.props.select} data={this.state.data} party={this.state.party}/>
+        <Monster
+          encounters={this.state.encounters}
+          selectedMonster={this.state.selectedMonster}
+        />
       </div>
     );
+  }
+}
+
+class Monster extends React.Component {
+  constructor(props){
+    super(props);
+
+    this.state = {
+      monster: this.props.selectedMonster,
+      encounters: this.props.encounters,
+      hit: 0,
+      condition: [],
+    }
+
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(e) {
+    if (e.target.value.match(/[^0-9]*/g).filter(obj => obj !== "").length > 0) { // Check if field contains non-numbers, if so, prevent.
+      e.preventDefault();
+    } else if (e.target.value.length === 0) {
+      e.preventDefault();
+      this.setState({
+        hit: 0,
+      });
+    } else {
+      this.setState({
+        hit: parseInt(e.target.value),
+      });
+
+
+      // const monster = this.props.selectedMonster;
+      // var testAc = monster.ac[0].ac;
+      // if (monster.ac.length > 1) {
+      //   monster.ac.forEach((item, i) => {
+      //     if (item.condition) {
+      //
+      //       if (window.confirm("Has monster condition: " + item.condition + "?")) {
+      //         testAc = item.ac;
+      //       }
+      //     }
+      //   });
+      // }
+      // if (toHit >= testAc) {
+      //   // hit!
+      //   var dmg = prompt("Hit! Roll for damage!");
+      //   // TODO: add damage type and test for resistance/immunity
+      //   monster.hp.current -= parseInt(dmg);
+      //   if (monster.hp.current <= 0) {
+      //     alert(monster.name + " has died!");
+      //     deleteEncounter(i, encounter, encounterList);
+      //   } else {
+      //     editEncounter(i, encounter, encounterList, monster);
+      //   }
+      // } else {
+      //   alert("Missed!");
+      // }
+
+
+    }
+  }
+
+  handleHit() {
+
+  }
+
+  handleDmg() {
+
+  }
+
+  handleST() {
+
+  }
+
+  handleCondition() {
+
+  }
+
+  render() {
+    if ((Object.keys(this.props.selectedMonster).length === 0 && this.props.selectedMonster.constructor === Object)) return null; // Don't show if monster is not selected
+
+    var dmgType = ["Acid", "Bludgeoning", "Cold", "Fire", "Force", "Lightning", "Necrotic", "Piercing", "Poison", "Psychic", "Radiant", "Slashing", "Thunder"];
+    dmgType = dmgType.map(i =>
+      <option value={i} key={i}>{i}</option>
+    );
+
+    var savingThrows = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
+    savingThrows = savingThrows.map(i =>
+      <option value={i} key={i}>{i}</option>
+    );
+
+    var conditions = ["Blinded", "Charmed", "Deafened", "Frightened", "Grappled", "Incapacitated", "Invisible", "Paralyzed", "Petrified", "Poisoned", "Prone", "Restrained", "Stunned", "Unconsious"];
+    conditions = conditions.map(i =>
+      <option value={i} key={i}>{i}</option>
+    );
+    // Change selectedMonster (see Menu component), upon clicking on "show" in the monster list of the encounter
+    return(
+      <div className="Menu MonsterMenu">
+        <div className="title">{this.props.selectedMonster.name}</div>
+        <div className="hr"></div>
+        <span>Attack</span>
+        <form onSubmit={this.handleHit}>
+          <input type="text" pattern="[0-9]*" onChange={this.handleChange} value={this.state.hit} />
+          <input type="submit" value="Hit" />
+        </form>
+        <form onSubmit={this.handleDmg} className="Party">
+          <fieldset disabled>
+            <input type="text" pattern="[0-9]*" onChange={this.handleChange} value={this.state.value} />
+            <select onChange={this.handleChangeParty}>{dmgType}</select>
+            <input type="submit" value="Damage" />
+          </fieldset>
+        </form>
+        <span>Saving Throws</span>
+        <form onSubmit={this.handleST} className="Party">
+          <select onChange={this.handleChangeParty}>{savingThrows}</select>
+          <input type="submit" value="Saving Throw" />
+        </form>
+        <span>Conditions</span>
+        <form onSubmit={this.handleCondition} className="Party">
+          <select onChange={this.handleChangeParty}>{conditions}</select>
+          <input type="submit" value="Add Condition" />
+        </form>
+        <span>Other</span>
+        <div>
+          <button>Show Statblock</button>
+          <button>Remove</button>
+        </div>
+      </div>
+    );
+  }
+}
+
+class Loader extends React.Component {
+  render() {
+    return(
+      <div className="loader">
+        Loading...
+      </div>
+      );
   }
 }
 
@@ -180,7 +325,6 @@ class EncounterList extends React.Component {
   }
 }
 
-
 class Difficulty extends React.Component {
   render() {
     var monsters = this.props.list;
@@ -231,11 +375,17 @@ class EncounterMonsterList extends React.Component {
   render() {
     var addMonsterElem;
     const list = this.props.list.map((m,i) =>
-      <div key={i}><span>{i+1}. {m.name}</span><span className="monsterListOptions"><button>hit</button><button onClick={() => showEncounterMonster(i, this.props.encounter, this.props.encounterList)}>show</button><button onClick={() => updateEncounter(this.props.encounter, i, this.props.encounterList, "remove")}>remove</button></span></div>
+      <div key={i}><span>{i+1}. {m.name}</span>
+        <span className="monsterListOptions">
+          <button onClick={() => hitMonster(i, this.props.encounter, this.props.encounterList)}>hit</button>
+          <button onClick={() => showEncounterMonster(i, this.props.encounter, this.props.encounterList)}>show</button>
+          <button onClick={() => deleteEncounter(this.props.encounter, i, this.props.encounterList)}>remove</button>
+        </span>
+      </div>
     );
 
     if (!(Object.keys(this.props.select).length === 0 && this.props.select.constructor === Object)) {
-      addMonsterElem = <div key={list.length} className="enabled" onClick={() => updateEncounter(this.props.encounter, createEncounterMonster(this.props.select, this.props.data), this.props.encounterList)}>{list.length+1}. Add Monster</div>
+      addMonsterElem = <div key={list.length} className="enabled" onClick={() => addEncounter(this.props.encounter, createEncounterMonster(this.props.select, this.props.data), this.props.encounterList)}>{list.length+1}. Add Monster</div>
     } else {
       addMonsterElem = <div key={list.length} className="disabled">{list.length+1}. Add Monster</div>
     }
@@ -247,14 +397,53 @@ class EncounterMonsterList extends React.Component {
   }
 }
 
+function hitMonster (i, encounter, encounterList) {
+  //updateEncounter();
+  var toHit = prompt("How much to hit?");
+  if (toHit != null) {
+    const monster = encounterList[encounter].monsters[i];
+    var testAc = monster.ac[0].ac;
+    if (monster.ac.length > 1) {
+      monster.ac.forEach((item, i) => {
+        if (item.condition) {
+          if (window.confirm("Has monster condition: " + item.condition + "?")) {
+            testAc = item.ac;
+          }
+        }
+      });
+    }
+    if (toHit >= testAc) {
+      // hit!
+      var dmg = prompt("Hit! Roll for damage!");
+      // TODO: add damage type and test for resistance/immunity
+      monster.hp.current -= parseInt(dmg);
+      if (monster.hp.current <= 0) {
+        alert(monster.name + " has died!");
+        deleteEncounter(i, encounter, encounterList);
+      } else {
+        editEncounter(i, encounter, encounterList, monster);
+      }
+    } else {
+      alert("Missed!");
+    }
+  }
+}
+
 function showEncounterMonster (i, encounter, encounterList) {
   updateSearch(encounterList[encounter].monsters[i], "all");
+  showMonster(encounterList[encounter].monsters[i]);
+}
+
+// Bound to the Menu class => shows all actions in the 2nd block
+function showMonster (selectedMonster) {
+  this.setState({selectedMonster});
 }
 
 function createEncounterMonster(m, d) {
   //console.log(getMonsterByName(d, m.name));
   var newMonster = _.cloneDeep(m);
-  newMonster.hp.calculated = dice(newMonster.hp.formula);
+  newMonster.hp.max = dice(newMonster.hp.formula);
+  newMonster.hp.current = newMonster.hp.max;
   //console.log(m);
   return newMonster;
 }
@@ -268,15 +457,24 @@ function calcXP(cr) {
   return CR2XP[cr];
 }
 
-// Update encounter e with monster m, or remove monster with index m from encounter e
-function updateEncounter(e, m, el, type="add") {
-  var encounters = el;
-  if (type === "add") {
-    encounters[e].monsters.push(m);
-  } else if (type === "remove") {
-    encounters[e].monsters.splice(m, 1);
-  }
+
+function updateEncounter(encounters) {
   this.setState({encounters});
+}
+
+function addEncounter (e, m, encounters) {
+  encounters[e].monsters.push(m);
+  updateEncounter(encounters);
+}
+
+function deleteEncounter (e, i, encounters) {
+  encounters[e].monsters.splice(i, 1);
+  updateEncounter(encounters);
+}
+
+function editEncounter (e, i, encounters, m) {
+  encounters[e].monsters[i] = m;
+  updateEncounter(encounters);
 }
 
 // Middleman function
