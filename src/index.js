@@ -136,13 +136,24 @@ class Monster extends React.Component {
       monster: this.props.selectedMonster,
       encounters: this.props.encounters,
       hit: 0,
+      dmg: 0,
       condition: [],
+      selectedCondition: "Blinded",
+      selectedST: "Strength",
     }
 
-    this.handleChange = this.handleChange.bind(this);
+    this.handleChangeHit = this.handleChangeHit.bind(this);
+    this.handleChangeDmg = this.handleChangeDmg.bind(this);
+
+    this.handleCondition = this.handleCondition.bind(this);
+    this.handleConditionClick = this.handleConditionClick.bind(this);
+    this.handleSelectedCondition = this.handleSelectedCondition.bind(this);
+
+    this.handleST = this.handleST.bind(this);
+    this.handleSelectedST = this.handleSelectedST.bind(this);
   }
 
-  handleChange(e) {
+  handleChangeHit(e) {
     if (e.target.value.match(/[^0-9]*/g).filter(obj => obj !== "").length > 0) { // Check if field contains non-numbers, if so, prevent.
       e.preventDefault();
     } else if (e.target.value.length === 0) {
@@ -154,53 +165,96 @@ class Monster extends React.Component {
       this.setState({
         hit: parseInt(e.target.value),
       });
+    }
+  }
 
-
-      // const monster = this.props.selectedMonster;
-      // var testAc = monster.ac[0].ac;
-      // if (monster.ac.length > 1) {
-      //   monster.ac.forEach((item, i) => {
-      //     if (item.condition) {
-      //
-      //       if (window.confirm("Has monster condition: " + item.condition + "?")) {
-      //         testAc = item.ac;
-      //       }
-      //     }
-      //   });
-      // }
-      // if (toHit >= testAc) {
-      //   // hit!
-      //   var dmg = prompt("Hit! Roll for damage!");
-      //   // TODO: add damage type and test for resistance/immunity
-      //   monster.hp.current -= parseInt(dmg);
-      //   if (monster.hp.current <= 0) {
-      //     alert(monster.name + " has died!");
-      //     deleteEncounter(i, encounter, encounterList);
-      //   } else {
-      //     editEncounter(i, encounter, encounterList, monster);
-      //   }
-      // } else {
-      //   alert("Missed!");
-      // }
-
-
+  handleChangeDmg(e) {
+    if (e.target.value.match(/[^0-9]*/g).filter(obj => obj !== "").length > 0) { // Check if field contains non-numbers, if so, prevent.
+      e.preventDefault();
+    } else if (e.target.value.length === 0) {
+      e.preventDefault();
+      this.setState({
+        hit: 0,
+      });
+    } else {
+      this.setState({
+        dmg: parseInt(e.target.value),
+      });
     }
   }
 
   handleHit() {
-
+    // const monster = this.props.selectedMonster;
+    // var testAc = monster.ac[0].ac;
+    // if (monster.ac.length > 1) {
+    //   monster.ac.forEach((item, i) => {
+    //     if (item.condition) {
+    //
+    //       if (window.confirm("Has monster condition: " + item.condition + "?")) {
+    //         testAc = item.ac;
+    //       }
+    //     }
+    //   });
+    // }
+    // if (toHit >= testAc) {
+    //   // hit!
+    //   var dmg = prompt("Hit! Roll for damage!");
+    //   // TODO: add damage type and test for resistance/immunity
+    //   monster.hp.current -= parseInt(dmg);
+    //   if (monster.hp.current <= 0) {
+    //     alert(monster.name + " has died!");
+    //     deleteEncounter(i, encounter, encounterList);
+    //   } else {
+    //     editEncounter(i, encounter, encounterList, monster);
+    //   }
+    // } else {
+    //   alert("Missed!");
+    // }
   }
 
   handleDmg() {
 
   }
 
-  handleST() {
-
+  handleST(e) {
+    e.preventDefault();
+    const st = this.state.selectedST.substring(0,3).toLowerCase(); // Get selected ST
+    var abm = "";
+    if (this.props.selectedMonster.save && this.props.selectedMonster.save[st]) {
+      abm = this.props.selectedMonster.save[st];
+    } else {
+      abm = Math.floor((this.props.selectedMonster[st] - 10) / 2); // Get from monster and calculate the modifier
+      if (abm > 0) {
+        abm = "+" + abm;
+      } else {
+        abm = "" + abm;
+      }
+    }
+    const v = dice("1d20" + abm);
+    alert(this.props.selectedMonster.name + " has rolled a " + v + " on a " + this.state.selectedST + " saving throw!");
   }
 
-  handleCondition() {
+  handleSelectedST(e) {
+    this.setState({selectedST: e.target.value});
+  }
 
+  handleCondition(e) {
+    e.preventDefault();
+    var c = this.state.condition;
+    if (!c.includes(this.state.selectedCondition)) {
+      c.push(this.state.selectedCondition);
+      this.setState({condition: c});
+    }
+  }
+
+  handleConditionClick(i) {
+    var c = this.state.condition;
+    c.splice(i, 1);
+    this.setState({condition: c});
+  }
+
+  handleSelectedCondition(event) {
+    this.setState({selectedCondition: event.target.value});
   }
 
   render() {
@@ -220,33 +274,39 @@ class Monster extends React.Component {
     conditions = conditions.map(i =>
       <option value={i} key={i}>{i}</option>
     );
-    // Change selectedMonster (see Menu component), upon clicking on "show" in the monster list of the encounter
+
+    const conditionsShow = this.state.condition.map((e,i) =>
+      <span key={i} onClick={() => this.handleConditionClick(i)}><i className="material-icons">blur_on</i> {e}</span>
+    );
+
     return(
       <div className="Menu MonsterMenu">
         <div className="title">{this.props.selectedMonster.name}</div>
         <div className="hr"></div>
         <span>Attack</span>
         <form onSubmit={this.handleHit}>
-          <input type="text" pattern="[0-9]*" onChange={this.handleChange} value={this.state.hit} />
+          <input type="text" pattern="[0-9]*" onChange={this.handleChangeHit} value={this.state.hit} />
           <input type="submit" value="Hit" />
+          <button className="formButton">Direct Hit</button>
         </form>
         <form onSubmit={this.handleDmg} className="Party">
           <fieldset disabled>
-            <input type="text" pattern="[0-9]*" onChange={this.handleChange} value={this.state.value} />
+            <input type="text" pattern="[0-9]*" onChange={this.handleChangeDmg} value={this.state.dmg} />
             <select onChange={this.handleChangeParty}>{dmgType}</select>
             <input type="submit" value="Damage" />
           </fieldset>
         </form>
         <span>Saving Throws</span>
         <form onSubmit={this.handleST} className="Party">
-          <select onChange={this.handleChangeParty}>{savingThrows}</select>
+          <select onChange={this.handleSelectedST}>{savingThrows}</select>
           <input type="submit" value="Saving Throw" />
         </form>
         <span>Conditions</span>
         <form onSubmit={this.handleCondition} className="Party">
-          <select onChange={this.handleChangeParty}>{conditions}</select>
+          <select onChange={this.handleSelectedCondition}>{conditions}</select>
           <input type="submit" value="Add Condition" />
         </form>
+        <div className="PartyMembers">{conditionsShow}</div>
         <span>Other</span>
         <div>
           <button>Show Statblock</button>
@@ -487,13 +547,17 @@ function updateStatblockInfo(StatblockInfo) {
   this.setState({StatblockInfo});
 }
 
-// Add an index to all monsters
+// Add an index to all monsters. Also add xp to the monster
 function addID(d) {
   d = d.monster;
   // Search for given monster
   for (var i = 0; i < d.length; i++) {
     d[i].id = i;
-    d[i].xp = calcXP(d[i].cr);
+    if (typeof d[i].cr === 'object') {
+      d[i].xp = calcXP(d[i].cr.cr);
+    } else {
+      d[i].xp = calcXP(d[i].cr);
+    }
   }
   console.log(d);
   return d;

@@ -338,6 +338,9 @@ body {
   button:hover {
     background-color: $DarkVariant;
   }
+  .formButton {
+    width: 100%;
+  }
 
   .Party {
     input[type="text"] {
@@ -490,5 +493,11 @@ body {
   .actionname {
       font-weight: bold;
       font-style: italic;
+  }
+
+  .spellcasting {
+    > div:not(:first-child) {
+      margin-top: 10px;
+    }
   }
 }

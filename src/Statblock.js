@@ -21,9 +21,20 @@ class StatBlock extends React.Component {
                   <tbody><tr><td>{AbilityModifier(monster.str)}</td><td>{AbilityModifier(monster.dex)}</td><td>{AbilityModifier(monster.con)}</td><td>{AbilityModifier(monster.int)}</td><td>{AbilityModifier(monster.wis)}</td><td>{AbilityModifier(monster.cha)}</td></tr></tbody>
               </table>
             <TriangleHR />
-              <MonsterInfo monster={monster} />
+              <div className="red">
+                <MonsterInfoST type="Saving Throws" value={monster.save} />
+                <MonsterInfoSkills type="Skills" value={monster.skill} />
+                <MonsterInfoVul type="Damage Vulnerabilities" value={monster.vulnerable} />
+                <MonsterInfoRes type="Damage Resistances" value={monster.resist} />
+                <MonsterInfoImm type="Damage Immunities" value={monster.immune} />
+                <MonsterInfoCImm type="Condition Immunities" value={monster.conditionImmune} />
+                <MonsterInfoSenses type="Senses" sense={monster.senses} passive={monster.passive} />
+                <MonsterInfoLan type="Languages" value={monster.languages} />
+                <MonsterInfoCR type="Challenge" cr={monster.cr} xp={monster.xp} />
+              </div>
             <TriangleHR />
               <Traits traits={monster.trait} />
+              <Spellcasting spells={monster.spellcasting} />
               <Actions actions={monster.action} />
               <LegendaryActions actions={monster.legendary} />
           </div>
@@ -38,7 +49,14 @@ class StatBlock extends React.Component {
                   <Speed speed={monster.speed} />
               </div>
             <TriangleHR />
+              <div className="red">
+                <MonsterInfoSkills type="Skills" value={monster.skill} />
+                <MonsterInfoSenses type="Senses" sense={monster.senses} passive={monster.passive} />
+                <MonsterInfoLan type="Languages" value={monster.languages} />
+              </div>
+            <TriangleHR />
               <Traits traits={monster.trait} />
+              <Spellcasting spells={monster.spellcasting} />
               <Actions actions={monster.action} />
               <LegendaryActions actions={monster.legendary} />
           </div>
@@ -74,6 +92,45 @@ function Actions(props) {
       {t}
     </div>
   );
+}
+
+function Spellcasting(props) {
+  if (!props.spells) return null;
+  var list = [];
+
+  props.spells.forEach((spells, i) => {
+    var spellsFormated = [];
+    for (const [lvl, value] of Object.entries(spells.spells)) {
+      const spelllist = value.spells.map(s => bracketText(s, 'string'));
+      var spellistText = spelllist.join(", ");
+      var spelllvl = parseInt(lvl);
+      var elem;
+      if (spelllvl === 0) {
+        elem = <div key={lvl} className="monsterInfoDiv">Cantrips (at will): <span className="description">{spellistText}</span></div>;
+      } else {
+        var x = "th";
+        if (spelllvl === 1) x = "st";
+        if (spelllvl === 2) x = "nd";
+        if (spelllvl === 3) x = "rd";
+        elem = <div key={spelllvl} className="monsterInfoDiv">{spelllvl}{x} level ({value.slots} slots): <span className="description">{spellistText}</span></div>;
+      }
+      spellsFormated.push(elem);
+    }
+
+    list.push(
+      <div key={i} className="action spellcasting">
+        <span className="actionname">{spells.name}. </span>
+        <span className="actionDescription">{bracketText(spells.headerEntries)}</span>
+        <div>
+          <span className="actionDescription">{spellsFormated}</span>
+        </div><div>
+          <span className="actionDescription description">{bracketText(spells.footerEntries)}</span>
+        </div>
+      </div>
+    );
+  });
+
+  return <div>{list}</div>;
 }
 
 function LegendaryActions(props) {
@@ -123,12 +180,7 @@ function Armor(props) {
     if (item.ac) {
       ac += item.ac;
       if (item.from) {
-        var from = "";
-        item.from.forEach(e => {
-          from += bracketText(e, "string") + ", ";
-        });
-        from = from.slice(0, -2);
-        ac += " (" + from + ")";
+        ac += " (" + bracketText(item.from, "string").join(", ") + ")";
       }
       if (item.condition) {
         ac += " " + bracketText(item.condition, "string");
@@ -243,23 +295,6 @@ function TriangleHR(props) {
   return <div className="triangleContainer"><div className="triangle"></div></div>;
 }
 
-// Show all different infos of the monster
-function MonsterInfo(props) {
-  return (
-    <div className="red">
-      <MonsterInfoST type="Saving Throws" value={props.monster.save} />
-      <MonsterInfoSkills type="Skills" value={props.monster.skill} />
-      <MonsterInfoVul type="Damage Vulnerabilities" value={props.monster.vulnerable} />
-      <MonsterInfoRes type="Damage Resistances" value={props.monster.resist} />
-      <MonsterInfoImm type="Damage Immunities" value={props.monster.immune} />
-      <MonsterInfoCImm type="Condition Immunities" value={props.monster.conditionImmune} />
-      <MonsterInfoSenses type="Senses" sense={props.monster.senses} passive={props.monster.passive} />
-      <MonsterInfoLan type="Languages" value={props.monster.languages} />
-      <MonsterInfoCR type="Challenge" cr={props.monster.cr} xp={props.monster.xp} />
-    </div>
-  );
-}
-
 // individual info, show nothing if not specified in the data
 function MonsterInfoST(props) {
   if (!props.value) return null;
@@ -305,13 +340,15 @@ function MonsterInfoRes(props) {
         if (e.preNote) {
           v += e.preNote + " ";
         }
-        e.resist.forEach(a => {
-          v += a + ", ";
-        });
+        // e.resist.forEach(a => {
+        //   v += a + ", ";
+        // });
+
+        v += e.resist.join(", ");
         if (e.note) {
-          v = v.slice(0, -2) + " " + e.note + "; ";
+          v += " " + e.note + "; ";
         } else {
-          v = v.slice(0, -2) + "; ";
+          v += "; ";
         }
       }
     }
@@ -327,10 +364,7 @@ function MonsterInfoImm(props) {
       if (v.length > 2) {
         v = v.slice(0, -2) + "; ";
       }
-      e.immune.forEach((item, i) => {
-        v += item + ", ";
-      });
-      v = v.slice(0, -2);
+      v += e.immune.join(", ");
       v += " " + e.note + "; ";
     } else {
       v += e + ", ";
@@ -341,35 +375,23 @@ function MonsterInfoImm(props) {
 }
 function MonsterInfoCImm(props) {
   if (!props.value) return null;
-  var v = "";
-  props.value.forEach(e => {
-    v += e + ", ";
-  });
-  v = v.slice(0, -2);
-  return <MonsterInfoDiv type={props.type} value={v} />;
+  return <MonsterInfoDiv type={props.type} value={props.value.join(", ")} />;
 }
 function MonsterInfoSenses(props) {
   var v = "";
-  if (props.sense) {
-    props.sense.forEach(e => {
-      v += e + ", ";
-    });
-  }
+  if (props.sense) v += props.sense.join(", ") + ", ";
   v += "passive Perception " + props.passive;
   return <MonsterInfoDiv type={props.type} value={v} />;
 }
 function MonsterInfoLan(props) {
   if (!props.value) return <MonsterInfoDiv type={props.type} value="–" />;
-  var v = "";
-  props.value.forEach(e => {
-    v += e + ", ";
-  });
-  v = v.slice(0, -2);
-  return <MonsterInfoDiv type={props.type} value={v} />;
+  return <MonsterInfoDiv type={props.type} value={props.value.join(", ")} />;
 }
 function MonsterInfoCR(props) {
   if (!props.cr) return null;
-  var v = props.cr + " (" + props.xp.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " XP)";
+  var cr = props.cr;
+  if (typeof cr === 'object') cr = cr.cr;
+  var v = cr + " (" + props.xp.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " XP)";
   return <MonsterInfoDiv type={props.type} value={v} />;
 }
 
@@ -463,7 +485,7 @@ function alterBracketText(entry, t) {
             }
             break;
           case "spell":
-            if (t === "array") newText = <span key={i} className="description">newText</span>;
+            if (t === "array") newText = <span key={i} className="description">{newText}</span>;
             break;
           default:
 
