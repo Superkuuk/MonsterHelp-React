@@ -145,6 +145,7 @@ class Autocomplete extends Component {
         <input
           type="text"
           onChange={onChange}
+          onFocus={onChange}
           onKeyDown={onKeyDown}
           value={userInput}
           placeholder={this.state.placeholder}

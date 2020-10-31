@@ -100,21 +100,34 @@ function Spellcasting(props) {
 
   props.spells.forEach((spells, i) => {
     var spellsFormated = [];
-    for (const [lvl, value] of Object.entries(spells.spells)) {
-      const spelllist = value.spells.map(s => bracketText(s, 'string'));
-      var spellistText = spelllist.join(", ");
-      var spelllvl = parseInt(lvl);
-      var elem;
-      if (spelllvl === 0) {
-        elem = <div key={lvl} className="monsterInfoDiv">Cantrips (at will): <span className="description">{spellistText}</span></div>;
-      } else {
-        var x = "th";
-        if (spelllvl === 1) x = "st";
-        if (spelllvl === 2) x = "nd";
-        if (spelllvl === 3) x = "rd";
-        elem = <div key={spelllvl} className="monsterInfoDiv">{spelllvl}{x} level ({value.slots} slots): <span className="description">{spellistText}</span></div>;
+    if (spells.spells) {
+      for (const [lvl, value] of Object.entries(spells.spells)) {
+        const spelllist = value.spells.map(s => bracketText(s, 'string'));
+        var spellistText = spelllist.join(", ");
+        var spelllvl = parseInt(lvl);
+        var elem;
+        if (spelllvl === 0) {
+          elem = <div key={lvl} className="monsterInfoDiv">Cantrips (at will): <span className="description">{spellistText}</span></div>;
+        } else {
+          var x = "th";
+          if (spelllvl === 1) x = "st";
+          if (spelllvl === 2) x = "nd";
+          if (spelllvl === 3) x = "rd";
+          elem = <div key={spelllvl} className="monsterInfoDiv">{spelllvl}{x} level ({value.slots} slots): <span className="description">{spellistText}</span></div>;
+        }
+        spellsFormated.push(elem);
       }
-      spellsFormated.push(elem);
+
+    } else if (spells.will) {
+      const spelllist = spells.will.map(s => bracketText(s, 'string')).join(", ");
+      spellsFormated.push(<div className="monsterInfoDiv" key={spellsFormated.length}>At will: <span className="description">{spelllist}</span></div>);
+    } else if (spells.daily) {
+      for (const [day, value] of Object.entries(spells.daily)) {
+        const spelllist = value.map(s => bracketText(s, 'string')).join(", ");
+        var amount = day.replace(/[0-9]/g, '');
+        if (amount === "e") amount = " each";
+        spellsFormated.push(<div className="monsterInfoDiv" key={spellsFormated.length}>{parseInt(day)}/day{amount}: <span className="description">{spelllist}</span></div>);
+      }
     }
 
     list.push(
@@ -401,6 +414,7 @@ function MonsterInfoDiv(props){
 
 // Style specified text with brackets
 function bracketText(s, t="array") {
+  if (s === undefined) return [];
   if (typeof s !== 'object') s = [s]; // Make string as array, to make it loopable
   var r = [];
   s.forEach((entry, index) => {

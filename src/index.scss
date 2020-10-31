@@ -4,6 +4,7 @@ $BaseColor: DodgerBlue;
 $DarkVariant: #006fc2;
 $fontSize: 14px;
 $inputBG: #f1f1f1;
+$noteColor: #cfe7ce;
 
 
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
@@ -42,7 +43,7 @@ body {
   padding: 10px;
   margin: 10px;
   float: left;
-  background-color: #cfe7ce;
+  background-color: $noteColor;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
   display: flex;
@@ -228,6 +229,7 @@ body {
     .encounterBox {
       background-color: $inputBG;
       border: 1px solid grey;
+      margin-bottom: 10px;
     }
     .encounterName {
       padding: 10px;
@@ -258,6 +260,10 @@ body {
       div {
         padding: 2px 10px;
         margin: 0;
+      }
+      div:not(div:last-child):hover {
+        cursor: pointer;
+        background-color: $BaseColor !important;
       }
       div span:not(.monsterListOptions) {
         line-height: calc(#{$fontSize} + 14px);
@@ -301,8 +307,50 @@ body {
           background-color: $DarkVariant;
         }
       }
+      .healthy {
+        color: green;
+      }
+      .wounded {
+        color: #C9C308;
+      }
+      .injured {
+        color: orange;
+      }
+      .beaten, .dead {
+        color: red;
+      }
+
     }
   }
+}
+
+@keyframes AttackHit {
+  0%   { background-color: #02BF11  ; }
+  100% { background-color: $noteColor; }
+}
+@keyframes AttackMiss {
+  0%   { background-color: $red; }
+  100% { background-color: $noteColor; }
+}
+@keyframes AttackHit2 {
+  0%   { background-color: #02BF11  ; }
+  100% { background-color: $noteColor; }
+}
+@keyframes AttackMiss2 {
+  0%   { background-color: $red; }
+  100% { background-color: $noteColor; }
+}
+.hitAnimated {
+  animation: AttackHit 1s ease-out;
+}
+.hitAnimated2 {
+  animation: AttackHit2 1s ease-out;
+}
+.missAnimated {
+  animation: AttackMiss 1s ease-out;
+}
+.missAnimated2 {
+  animation: AttackMiss2 1s ease-out;
 }
 
 .MonsterMenu {
@@ -345,12 +393,29 @@ body {
   .Party {
     input[type="text"] {
       margin-right: 4px;
+      flex-shrink: 1;
     }
     fieldset {
       margin: 0;
       padding: 0;
       border: none;
       display: flex;
+
+      .magical {
+        background-color: $DarkVariant;
+        color: white;
+      }
+      .magical:before {
+        content: "Magical";
+      }
+
+      .nonmagical {
+        background-color: darkgrey;
+        color: #444444;
+      }
+      .nonmagical:before {
+        content: "Normal";
+      }
     }
     fieldset:disabled {
       opacity: 0.4;
@@ -382,6 +447,73 @@ body {
     margin-top: 10px;
   }
 
+  .container {
+    display: block;
+    position: relative;
+    padding-left: 47px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    line-height: 37px;
+    font-style: italic;
+
+    /* Hide the browser's default checkbox */
+    input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    /* Create a custom checkbox */
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 37px;
+      width: 37px;
+      background-color: #eee;
+    }
+
+    /* On mouse-over, add a grey background color */
+    :hover input ~ .checkmark {
+      background-color: #ccc;
+    }
+
+    /* When the checkbox is checked, add a blue background */
+    input:checked ~ .checkmark {
+      background-color: $BaseColor;
+    }
+
+    /* Create the checkmark/indicator (hidden when not checked) */
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+
+    /* Show the checkmark when checked */
+    input:checked ~ .checkmark:after {
+      display: block;
+    }
+
+    /* Style the checkmark/indicator */
+    .checkmark:after {
+      left: 13.34px;
+      top: 7.4px;
+      width: 7.4px;
+      height: 14.8px;
+      border: solid white;
+      border-width: 0 4.44px 4.44px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+  }
 }
 
 
