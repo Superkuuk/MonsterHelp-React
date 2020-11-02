@@ -516,8 +516,6 @@ body {
   }
 }
 
-
-
 .StatBlock {
   width: 350px;
   padding: 10px;
@@ -578,6 +576,18 @@ body {
     }
   }
 
+  .spanList {
+    > span {
+      display: inline !important;
+    }
+    > span:not(:last-child):after {
+      content: ", ";
+    }
+    .spanListExeption:after {
+      content: "" !important;
+    }
+  }
+
   .monsterInfoDiv {
     margin-left: 1em;
     text-indent: -1em;
@@ -632,4 +642,53 @@ body {
       margin-top: 10px;
     }
   }
+}
+
+.spell {
+  position: absolute;
+  max-width: 350px;
+  padding: 10px;
+  margin: 10px;
+
+  border: {
+    top: 5px solid $borderColor; // Fallback
+    bottom: 5px solid $borderColor; // Fallback
+    image: url(https://i.imgur.com/gtHyLi6.png);
+    width: 8px;
+    image-slice: 20;
+  }
+  background: {
+    color: #fff4d1;
+  }
+
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+  .name {
+    font: {
+      size: 225%;
+      family: Baskerville, serif;
+      variant: small-caps;
+      weight: 600;
+    }
+    color: $red;
+  }
+
+  .spellInfo {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .description {
+      font-style: italic;
+  }
+
+  .bold {
+      font-weight: bold;
+  }
+
+  .textEntries span:not(:first-child) {
+    display: block;
+    text-indent: 1em;
+  }
+
 }

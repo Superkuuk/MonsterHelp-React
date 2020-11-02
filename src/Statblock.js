@@ -1,12 +1,30 @@
 import React from 'react';
+import Spell from './spells.js';
+import SpellData from './spellData.js'
+
 
 class StatBlock extends React.Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      selectedSpell: {},
+      spellPlace: {x: 0, y: 0, place: "under"},
+    }
+
+    SpellData.data = this.props.spells;
+    Object.freeze(SpellData)
+
+    showSpell = showSpell.bind(this);
+    hideSpell = hideSpell.bind(this);
+  }
+
   render() {
     if (!(Object.keys(this.props.monster).length === 0 && this.props.monster.constructor === Object)) {
       var monster = this.props.monster;
       if (this.props.info === "all") {
         return (
           <div className="StatBlock">
+              <Spell spell={this.state.selectedSpell} place={this.state.spellPlace} />
               <div className="name">{monster.name}</div>
               <Type monster={monster} />
             <TriangleHR />
@@ -42,6 +60,7 @@ class StatBlock extends React.Component {
       } else if (this.props.info === "reduced") {
         return (
           <div className="StatBlock">
+              <Spell spell={this.state.selectedSpell} place={this.state.spellPlace} />
               <div className="name">{monster.name}</div>
               <Type monster={monster} />
             <TriangleHR />
@@ -102,31 +121,32 @@ function Spellcasting(props) {
     var spellsFormated = [];
     if (spells.spells) {
       for (const [lvl, value] of Object.entries(spells.spells)) {
-        const spelllist = value.spells.map(s => bracketText(s, 'string'));
-        var spellistText = spelllist.join(", ");
+        const spelllist = value.spells.map(s => bracketText(s));
+        //var spellistText = spelllist.join(", ");
+        var spellistText = spelllist;
         var spelllvl = parseInt(lvl);
         var elem;
         if (spelllvl === 0) {
-          elem = <div key={lvl} className="monsterInfoDiv">Cantrips (at will): <span className="description">{spellistText}</span></div>;
+          elem = <div key={lvl} className="monsterInfoDiv">Cantrips (at will): <span className="description spanList">{spellistText}</span></div>;
         } else {
           var x = "th";
           if (spelllvl === 1) x = "st";
           if (spelllvl === 2) x = "nd";
           if (spelllvl === 3) x = "rd";
-          elem = <div key={spelllvl} className="monsterInfoDiv">{spelllvl}{x} level ({value.slots} slots): <span className="description">{spellistText}</span></div>;
+          elem = <div key={spelllvl} className="monsterInfoDiv">{spelllvl}{x} level ({value.slots} slots): <span className="description spanList">{spellistText}</span></div>;
         }
         spellsFormated.push(elem);
       }
 
     } else if (spells.will) {
-      const spelllist = spells.will.map(s => bracketText(s, 'string')).join(", ");
-      spellsFormated.push(<div className="monsterInfoDiv" key={spellsFormated.length}>At will: <span className="description">{spelllist}</span></div>);
+      const spelllist = spells.will.map(s => bracketText(s));
+      spellsFormated.push(<div className="monsterInfoDiv" key={spellsFormated.length}>At will: <span className="description spanList">{spelllist}</span></div>);
     } else if (spells.daily) {
       for (const [day, value] of Object.entries(spells.daily)) {
-        const spelllist = value.map(s => bracketText(s, 'string')).join(", ");
+        const spelllist = value.map(s => bracketText(s));
         var amount = day.replace(/[0-9]/g, '');
         if (amount === "e") amount = " each";
-        spellsFormated.push(<div className="monsterInfoDiv" key={spellsFormated.length}>{parseInt(day)}/day{amount}: <span className="description">{spelllist}</span></div>);
+        spellsFormated.push(<div className="monsterInfoDiv" key={spellsFormated.length}>{parseInt(day)}/day{amount}: <span className="description spanList">{spelllist}</span></div>);
       }
     }
 
@@ -188,22 +208,22 @@ function Speed(props) {
 }
 
 function Armor(props) {
-  var ac = "";
+  var ac = [];
   props.ac.forEach((item, i) => {
+    ac.push(<span key={i+"a"}>, </span>);
     if (item.ac) {
-      ac += item.ac;
+      ac.push(<span key={i+"b"}>{item.ac}</span>);
       if (item.from) {
-        ac += " (" + bracketText(item.from, "string").join(", ") + ")";
+        ac.push(<span key={i+"c"} className="spanList"> ({bracketText(item.from)})</span>);
       }
       if (item.condition) {
-        ac += " " + bracketText(item.condition, "string");
+        ac.push(<span key={i+"d"} className="spanList"> {bracketText(item.condition)}</span>);
       }
-      ac += ", ";
     } else {
-      ac += item + ", ";
+      ac.push(<span key={i+"e"}>{item}</span>);
     }
   });
-  ac = ac.slice(0, -2);
+  ac.shift();
 
   return <div ><span className="bold">Armor </span><span>{ac}</span></div>;
 }
@@ -413,7 +433,7 @@ function MonsterInfoDiv(props){
 }
 
 // Style specified text with brackets
-function bracketText(s, t="array") {
+function bracketText(s) {
   if (s === undefined) return [];
   if (typeof s !== 'object') s = [s]; // Make string as array, to make it loopable
   var r = [];
@@ -421,29 +441,17 @@ function bracketText(s, t="array") {
     if (typeof entry === 'object') {
       // Loop through all subentries of this entry object
       entry.items.forEach((item, i) => {
-        if (t === "array") {
-          r.push(<span key={index + "_" + i} className="subActionDescriptionParagraph"><span className="bold">{item.name}</span> {alterBracketText(item.entry, t)}</span>);
-        } else {
-          r.push(item.name + ". " + alterBracketText(item.entry, t));
-        }
+        r.push(<span key={index + "_" + i} className="subActionDescriptionParagraph"><span className="bold">{item.name}</span> {alterBracketText(item.entry)}</span>);
       });
-
     } else {
-      if (t === "array") {
-        r.push(<span key={index} className="actionDescriptionParagraph">{alterBracketText(entry, t)}</span>);
-      } else {
-        const textArray = alterBracketText(entry, t);
-        var newReturn = "";
-        textArray.forEach((item, i) => newReturn += item);
-        r.push(newReturn);
-      }
+      r.push(<span key={index} className="actionDescriptionParagraph">{alterBracketText(entry)}</span>);
     }
 
   });
   return r;
 }
 
-function alterBracketText(entry, t) {
+function alterBracketText(entry) {
   var textArray = [entry];
   if (entry.match(/{([^}]+)}/g)) { // Only format if there are brackets
     textArray = entry.split(/{([^}]+)}/g);
@@ -461,29 +469,27 @@ function alterBracketText(entry, t) {
           case "dice":
             break;
           case "atk":
-            if (t === "array") {
-              if (newText === "mw") {
-                newText = <span key={i} className="description">Melee Weapon Attack: </span>;
-              } else if (newText === "mw,rw") {
-                newText = <span key={i} className="description">Melee or Ranged Weapon Attack: </span>;
-              } else if (newText === "rw") {
-                newText = <span key={i} className="description">Ranged Weapon Attack: </span>;
-              } else if (newText === "ms") {
-                newText = <span key={i} className="description">Melee Spell Attack: </span>;
-              } else if (newText === "rs") {
-                  newText = <span key={i} className="description">Ranged Spell Attack: </span>;
-              } else if (newText === "ms,rs") {
-                newText = <span key={i} className="description">Melee or Ranged Spell Attack: </span>;
-              } else {
-                newText = <span key={i} className="description red">UNDEFINED Attack: </span>;
-              }
+            if (newText === "mw") {
+              newText = <span key={i} className="description">Melee Weapon Attack: </span>;
+            } else if (newText === "mw,rw") {
+              newText = <span key={i} className="description">Melee or Ranged Weapon Attack: </span>;
+            } else if (newText === "rw") {
+              newText = <span key={i} className="description">Ranged Weapon Attack: </span>;
+            } else if (newText === "ms") {
+              newText = <span key={i} className="description">Melee Spell Attack: </span>;
+            } else if (newText === "rs") {
+                newText = <span key={i} className="description">Ranged Spell Attack: </span>;
+            } else if (newText === "ms,rs") {
+              newText = <span key={i} className="description">Melee or Ranged Spell Attack: </span>;
+            } else {
+              newText = <span key={i} className="description red">UNDEFINED Attack: </span>;
             }
             break;
           case "hit":
             newText = "+" + newText;
             break;
           case "h":
-            if (t === "array") newText = <span key={i} className="description">Hit: </span>;
+            newText = <span key={i} className="description">Hit: </span>;
             break;
           case "damage":
             break;
@@ -499,7 +505,7 @@ function alterBracketText(entry, t) {
             }
             break;
           case "spell":
-            if (t === "array") newText = <span key={i} className="description">{newText}</span>;
+            newText = <span key={i} className="description" onMouseOver={(event) => showSpell(event)} onMouseOut={() => hideSpell()}>{newText}</span>;
             break;
           default:
 
@@ -510,6 +516,28 @@ function alterBracketText(entry, t) {
     textArray = textArray.filter(obj => obj !== "");
   }
   return textArray;
+}
+
+var showSpell = function(e) {
+  const spell = SpellData.data.filter(s => {
+    return s.name.toLowerCase() === e.target.innerHTML.toLowerCase()
+  });
+  const x = e.target.getBoundingClientRect().left;
+  const y = e.target.getBoundingClientRect().top;
+  var place = ((y > window.innerHeight/2) ? "above" : "under"); // place spell div above or under hovered element
+
+  this.setState({
+    selectedSpell: spell,
+    spellPlace: {x: x - 350, y: y, place: place},
+  });
+}
+
+var hideSpell = function() {
+  this.setState({
+    selectedSpell: {},
+    spellX: 0,
+    spellY: 0,
+  });
 }
 
 // Returns the given (signed) modifier for an ability as string (including the original value)

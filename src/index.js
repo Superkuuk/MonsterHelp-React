@@ -5,6 +5,7 @@ import StatBlock from './Statblock.js';
 import Autocomplete from "./Autocomplete.js";
 import _ from 'lodash';
 const Bestiary = 'https://raw.githubusercontent.com/TheGiddyLimit/TheGiddyLimit.github.io/master/data/bestiary/bestiary-mm.json';
+const SpellLibrary = 'https://raw.githubusercontent.com/TheGiddyLimit/TheGiddyLimit.github.io/master/data/spells/spells-phb.json';
 
 
 class Main extends React.Component {
@@ -12,7 +13,9 @@ class Main extends React.Component {
     super(props);
     this.state = {
       data: [],
-      isLoaded: false,
+      spellData: [],
+      BestiaryLoaded: false,
+      SpellsLoaded: false,
       StatblockInfo: "all",
       monsterToShow: {},
     };
@@ -30,13 +33,22 @@ class Main extends React.Component {
     .then(data => {
       this.setState({
         data: data,
-        isLoaded: true,
+        BestiaryLoaded: true,
       })
+    });
+
+    fetch(SpellLibrary)
+    .then(response => response.json())
+    .then(data => {
+      this.setState({
+        spellData: data.spell,
+        SpellsLoaded: true,
+      }, console.log(data.spell))
     });
   }
 
   render() {
-    if (!this.state.isLoaded) {
+    if (!this.state.BestiaryLoaded || !this.state.SpellsLoaded) {
       return (<Loader />);
     } else {
       return (
@@ -46,7 +58,7 @@ class Main extends React.Component {
             select={this.state.monsterToShow}
             toggleText={this.state.StatblockInfo}
           />
-          <StatBlock monster={this.state.monsterToShow} info={this.state.StatblockInfo} />
+          <StatBlock monster={this.state.monsterToShow} info={this.state.StatblockInfo} spells={this.state.spellData} />
         </div>
       );
     }
@@ -134,7 +146,7 @@ class Menu extends React.Component {
 }
 
 class Monster extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
 
     this.state = {
