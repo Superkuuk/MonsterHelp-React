@@ -34,15 +34,24 @@ class Spell extends React.Component {
     // }
 
     // placement (above/under)
-    var placement = ((pos.place === "under") ? {top: pos.y + 20, left: pos.x} : {bottom: window.innerHeight - pos.y, left: pos.x});
+    var placement = ((pos.place === "under") ? {top: pos.y + 20, left: pos.x, maxHeight: window.innerHeight - pos.y - 80} : {bottom: window.innerHeight - pos.y, left: pos.x, maxHeight: pos.y - 80});
     return (
       <div className="spell" style={placement}>
         <div className="name">{spell.name}</div>
-        <div className="spellInfo">
-          <span>{spell.time[0].number} {spell.time[0].unit}</span>
-          <span>{range}</span>
-          <span>{duration}</span>
-        </div>
+        <div className="triangleContainer"><div className="triangle"></div></div>
+        <table>
+          <thead className="bold"><tr>
+            <th>Casting Time</th>
+            <th>Range</th>
+            <th>Duration</th>
+          </tr></thead>
+          <tbody><tr>
+            <td>{spell.time[0].number} {spell.time[0].unit}</td>
+            <td>{range}</td>
+            <td>{duration}</td>
+          </tr></tbody>
+        </table>
+        <div className="triangleContainer"><div className="triangle"></div></div>
         <div className="textEntries">{description}</div>
       </div>
     );

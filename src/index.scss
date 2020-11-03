@@ -649,6 +649,7 @@ body {
   max-width: 350px;
   padding: 10px;
   margin: 10px;
+  overflow: scroll;
 
   border: {
     top: 5px solid $borderColor; // Fallback
@@ -673,9 +674,8 @@ body {
     color: $red;
   }
 
-  .spellInfo {
-    display: flex;
-    justify-content: space-between;
+  table {
+    color: black;
   }
 
   .description {
