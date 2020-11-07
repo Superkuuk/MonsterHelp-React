@@ -537,20 +537,6 @@ body {
 
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
-  .triangleContainer {
-      width: 350px;
-      overflow: hidden;
-  }
-
-  .triangle {
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 2.5px 0 2.5px 450px;
-    border-color: transparent transparent transparent $red;
-    margin: 7px 0px;
-  }
-
   .name {
     font: {
       size: 225%;
@@ -644,12 +630,43 @@ body {
   }
 }
 
+.triangleContainer {
+    width: 350px;
+    overflow: hidden;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 2.5px 0 2.5px 450px;
+  border-color: transparent transparent transparent $red;
+  margin: 7px 0px;
+}
+
+.blacked {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  background-color: rgba(0,0,0,0.6);
+  top: 0;
+  left: 0;
+  z-index: 100;
+  backdrop-filter: blur(6px);
+}
+
+.marginBottom40 {
+  height: 40px;
+  width: 100%;
+  position: relative;
+}
+
 .spell {
   position: absolute;
-  max-width: 350px;
+  max-width: 450px;
   padding: 10px;
   margin: 10px;
-  overflow: scroll;
+  z-index: 101;
 
   border: {
     top: 5px solid $borderColor; // Fallback
@@ -674,8 +691,32 @@ body {
     color: $red;
   }
 
+  .hr {
+      background: $red;
+      height: 2px;
+      margin: 7px 0;
+  }
+
   table {
     color: black;
+    width: 100%;
+    text-align: center;
+    margin: 7px 0;
+  }
+
+  .entryTable {
+    border-collapse: collapse;
+    td {
+      padding: 3px;
+    }
+    td:first-of-type, th:first-of-type {
+      text-align: left;
+    }
+    tbody tr:nth-child(odd) {background-color: #ffe9d1;}
+  }
+
+  .higherLevel {
+    text-indent: 1em;
   }
 
   .description {
@@ -686,8 +727,7 @@ body {
       font-weight: bold;
   }
 
-  .textEntries span:not(:first-child) {
-    display: block;
+  .textEntries div:not(:first-child) {
     text-indent: 1em;
   }
 

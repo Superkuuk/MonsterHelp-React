@@ -22,12 +22,13 @@ var bracketText = function(s) {
 function alterBracketText(entry) {
   var textArray = [entry];
   if (entry.match(/{([^}]+)}/g)) { // Only format if there are brackets
+
     textArray = entry.split(/{([^}]+)}/g);
     textArray.forEach((item, i) => {
       if (item[0] === "@") {
         var type = item.match(/@(\w*)/, '')[1]; // item
         var newText = item.replace(/@(\w*)(\s*)/g,''); // remove first word after @
-        newText = newText.replace(/\|(\w*)/g,''); // remove first word after |
+        newText = newText.replace("|phb",''); // remove |phb's
         switch (type) {
           case "item":
             break;
@@ -75,6 +76,10 @@ function alterBracketText(entry) {
           case "spell":
             // newText = <span key={i} className="description" onMouseOver={(event) => showSpell(event)} onMouseOut={() => hideSpell()}>{newText}</span>;
             newText = <span key={i} className="description spellHoverAction">{newText}</span>;
+            break;
+          case "scaledamage":
+            const arr = newText.split("|");;
+            newText = arr[arr.length-1];
             break;
           default:
 
